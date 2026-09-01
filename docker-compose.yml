@@ -1,0 +1,66 @@
+services:
+  browser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ht-run-browser
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      DISPLAY: ":99"
+
+    volumes:
+      - browser_profile:/home/appuser/browser-profile
+
+    networks:
+      - ht-run
+
+    shm_size: "2gb"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ht-run-api
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      DISPLAY: ":99"
+
+    depends_on:
+      - browser
+
+    networks:
+      - ht-run
+
+    ports:
+      - "8000:8000"
+
+  telegram:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ht-run-telegram
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    depends_on:
+      - api
+
+    networks:
+      - ht-run
+
+networks:
+  ht-run:
+    driver: bridge
+
+volumes:
+  browser_profile:
